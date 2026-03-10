@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Smart Market Price Prediction{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <div class="card">
+        <h2 style="color: #2e7d32; margin-bottom: 2rem; text-align: center;">Your Profile</h2>
+        
+        <form method="POST" action="{{ url_for('auth.profile') }}">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" class="form-control" value="{{ current_user.username }}" disabled>
+                <small style="color: #666;">Username cannot be changed</small>
+            </div>
+            
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" class="form-control" value="{{ current_user.email }}" disabled>
+                <small style="color: #666;">Email cannot be changed</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="full_name">Full Name</label>
+                <input type="text" class="form-control" id="full_name" name="full_name" value="{{ current_user.full_name or '' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="text" class="form-control" id="phone" name="phone" value="{{ current_user.phone_number or '' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="county">County</label>
+                <select class="form-control" id="county" name="county">
+                    <option value="">-- Select your county --</option>
+                    {% for county in counties %}
+                        <option value="{{ county }}" {% if current_user.county == county %}selected{% endif %}>{{ county }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Update Profile</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

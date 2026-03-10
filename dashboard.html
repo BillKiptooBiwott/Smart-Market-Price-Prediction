@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Smart Market Price Prediction{% endblock %}
+
+{% block content %}
+<h1 style="color: #2e7d32; margin-bottom: 2rem;">Welcome, {{ current_user.full_name or current_user.username }}!</h1>
+
+<div class="grid-2">
+    <div class="card">
+        <h3 style="color: #2e7d32; margin-bottom: 1rem;">Quick Price Check</h3>
+        <form id="quickPredictionForm">
+            <div class="form-group">
+                <label for="crop">Crop</label>
+                <select class="form-control" id="crop" required>
+                    <option value="Maize">Maize</option>
+                    <option value="Tomatoes">Tomatoes</option>
+                    <option value="Onions">Onions</option>
+                    <option value="Bananas">Bananas</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="market">Market</label>
+                <select class="form-control" id="market" required>
+                    <option value="Nairobi">Nairobi</option>
+                    <option value="Kirinyaga">Kirinyaga</option>
+                    <option value="Kisumu">Kisumu</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="days">Days Ahead</label>
+                <input type="number" class="form-control" id="days" min="1" max="30" value="7" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Get Prediction</button>
+        </form>
+        
+        <div id="quickResult" style="display: none; margin-top: 1rem; padding: 1rem; background: #f1f8e9; border-radius: 5px;"></div>
+    </div>
+    
+    <div class="card">
+        <h3 style="color: #2e7d32; margin-bottom: 1rem;">Recent Predictions</h3>
+        {% if recent_predictions %}
+            <div style="max-height: 300px; overflow-y: auto;">
+                {% for pred in recent_predictions %}
+                    <div style="padding: 0.75rem; border-bottom: 1px solid #c8e6c9;">
+                        <p><strong>{{ pred.crop }}</strong> in {{ pred.market }}</p>
+                        <p>KES {{ "%.2f"|format(pred.predicted_price) }}/kg | {{ pred.created_at.strftime('%Y-%m-%d') }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No predictions yet. Try the quick price check!</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <h3 style="color: #2e7d32; margin-bottom: 1rem;">Your Profile</h3>
+    <p><strong>Username:</strong> {{ current_user.username }}</p>
+    <p><strong>Email:</strong> {{ current_user.email }}</p>
+    <p><strong>County:</strong> {{ current_user.county or 'Not set' }}</p>
+    <p><strong>Phone:</strong> {{ current_user.phone_number or 'Not set' }}</p>
+    <p><strong>Member since:</strong> {{ current_user.created_at.strftime('%B %d, %Y') }}</p>
+    <a href="{{ url_for('auth.profile') }}" class="btn btn-primary btn-sm">Update Profile</a>
+</div>
+
+<script>
+    document.getElementById('quickPredictionForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const data = {
+            crop: document.getElementById('crop').value,
+            market: document.getElementById('market').value,
+            days: parseInt(document.getElementById('days').value)
+        };
+        
+        try {
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                const pred = result.prediction;
+                document.getElementById('quickResult').style.display = 'block';
+                document.getElementById('quickResult').innerHTML = `
+                    <p><strong>Predicted Price:</strong> KES ${pred.price}/kg</p>
+                    <p><strong>Range:</strong> KES ${pred.min_price} - ${pred.max_price}</p>
+                    <p><strong>Explanation:</strong> ${pred.explanation}</p>
+                `;
+            }
+        } catch (error) {
+            alert('Error getting prediction');
+        }
+    });
+</script>
+{% endblock %}

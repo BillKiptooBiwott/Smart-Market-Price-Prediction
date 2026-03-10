@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Users - Admin{% endblock %}
+
+{% block content %}
+<h1 style="color: #2e7d32; margin-bottom: 2rem;">Manage Users</h1>
+
+<div class="card">
+    <form method="GET" style="margin-bottom: 2rem;">
+        <div style="display: flex; gap: 1rem;">
+            <input type="text" name="search" class="form-control" placeholder="Search users..." value="{{ search }}">
+            <button type="submit" class="btn btn-primary">Search</button>
+            {% if search %}
+                <a href="{{ url_for('admin.admin_users') }}" class="btn btn-danger">Clear</a>
+            {% endif %}
+        </div>
+    </form>
+    
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="border-bottom: 2px solid #2e7d32;">
+                <th style="text-align: left; padding: 0.75rem;">ID</th>
+                <th style="text-align: left; padding: 0.75rem;">Username</th>
+                <th style="text-align: left; padding: 0.75rem;">Email</th>
+                <th style="text-align: left; padding: 0.75rem;">Full Name</th>
+                <th style="text-align: left; padding: 0.75rem;">Admin</th>
+                <th style="text-align: left; padding: 0.75rem;">Joined</th>
+                <th style="text-align: left; padding: 0.75rem;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users.items %}
+            <tr style="border-bottom: 1px solid #c8e6c9;">
+                <td style="padding: 0.75rem;">{{ user.id }}</td>
+                <td style="padding: 0.75rem;">{{ user.username }}</td>
+                <td style="padding: 0.75rem;">{{ user.email }}</td>
+                <td style="padding: 0.75rem;">{{ user.full_name or '-' }}</td>
+                <td style="padding: 0.75rem;">{{ 'Yes' if user.is_admin else 'No' }}</td>
+                <td style="padding: 0.75rem;">{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                <td style="padding: 0.75rem;">
+                    <form method="POST" action="{{ url_for('admin.toggle_admin', user_id=user.id) }}" style="display: inline;">
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            {{ 'Remove Admin' if user.is_admin else 'Make Admin' }}
+                        </button>
+                    </form>
+                    
+                    {% if user.id != current_user.id %}
+                    <form method="POST" action="{{ url_for('admin.delete_user', user_id=user.id) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this user?');">
+                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div style="margin-top: 2rem; display: flex; justify-content: space-between;">
+        <div>
+            Page {{ users.page }} of {{ users.pages }}
+        </div>
+        <div>
+            {% if users.has_prev %}
+                <a href="{{ url_for('admin.admin_users', page=users.prev_num, search=search) }}" class="btn btn-sm btn-primary">Previous</a>
+            {% endif %}
+            {% if users.has_next %}
+                <a href="{{ url_for('admin.admin_users', page=users.next_num, search=search) }}" class="btn btn-sm btn-primary">Next</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<h1 style="color: #2e7d32; margin-bottom: 2rem;">Admin Dashboard</h1>
+
+<div class="grid-2" style="margin-bottom: 2rem;">
+    <div class="card" style="text-align: center;">
+        <h3 style="color: #2e7d32;">Total Users</h3>
+        <p style="font-size: 2.5rem; font-weight: bold;">{{ total_users }}</p>
+        <p>{{ new_users }} new in last 30 days</p>
+    </div>
+    
+    <div class="card" style="text-align: center;">
+        <h3 style="color: #2e7d32;">Total Predictions</h3>
+        <p style="font-size: 2.5rem; font-weight: bold;">{{ total_predictions }}</p>
+        <p>{{ total_farmers }} farmers</p>
+    </div>
+</div>
+
+<div class="grid-2">
+    <div class="card">
+        <h3 style="color: #2e7d32; margin-bottom: 1rem;">Recent Users</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="border-bottom: 2px solid #2e7d32;">
+                    <th style="text-align: left; padding: 0.5rem;">Username</th>
+                    <th style="text-align: left; padding: 0.5rem;">Email</th>
+                    <th style="text-align: left; padding: 0.5rem;">Joined</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in recent_users %}
+                <tr style="border-bottom: 1px solid #c8e6c9;">
+                    <td style="padding: 0.5rem;">{{ user.username }}</td>
+                    <td style="padding: 0.5rem;">{{ user.email }}</td>
+                    <td style="padding: 0.5rem;">{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="{{ url_for('admin.admin_users') }}" class="btn btn-primary btn-sm" style="margin-top: 1rem;">View All Users</a>
+    </div>
+    
+    <div class="card">
+        <h3 style="color: #2e7d32; margin-bottom: 1rem;">Recent Predictions</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="border-bottom: 2px solid #2e7d32;">
+                    <th style="text-align: left; padding: 0.5rem;">User</th>
+                    <th style="text-align: left; padding: 0.5rem;">Crop</th>
+                    <th style="text-align: left; padding: 0.5rem;">Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pred in recent_predictions %}
+                <tr style="border-bottom: 1px solid #c8e6c9;">
+                    <td style="padding: 0.5rem;">{{ pred.user.username }}</td>
+                    <td style="padding: 0.5rem;">{{ pred.crop }}</td>
+                    <td style="padding: 0.5rem;">KES {{ "%.2f"|format(pred.predicted_price) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="{{ url_for('admin.admin_predictions') }}" class="btn btn-primary btn-sm" style="margin-top: 1rem;">View All Predictions</a>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 2rem;">
+    <h3 style="color: #2e7d32; margin-bottom: 1rem;">Quick Actions</h3>
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <a href="{{ url_for('admin.admin_users') }}" class="btn btn-primary">Manage Users</a>
+        <a href="{{ url_for('admin.admin_predictions') }}" class="btn btn-primary">View Predictions</a>
+        <a href="{{ url_for('admin.admin_stats') }}" class="btn btn-primary">View Statistics</a>
+    </div>
+</div>
+{% endblock %}

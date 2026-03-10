@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}All Predictions - Admin{% endblock %}
+
+{% block content %}
+<h1 style="color: #2e7d32; margin-bottom: 2rem;">All Predictions</h1>
+
+<div class="card">
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="border-bottom: 2px solid #2e7d32;">
+                <th style="text-align: left; padding: 0.75rem;">ID</th>
+                <th style="text-align: left; padding: 0.75rem;">User</th>
+                <th style="text-align: left; padding: 0.75rem;">Crop</th>
+                <th style="text-align: left; padding: 0.75rem;">Market</th>
+                <th style="text-align: left; padding: 0.75rem;">Price (KES)</th>
+                <th style="text-align: left; padding: 0.75rem;">Range</th>
+                <th style="text-align: left; padding: 0.75rem;">Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pred in predictions.items %}
+            <tr style="border-bottom: 1px solid #c8e6c9;">
+                <td style="padding: 0.75rem;">{{ pred.id }}</td>
+                <td style="padding: 0.75rem;">{{ pred.user.username }}</td>
+                <td style="padding: 0.75rem;">{{ pred.crop }}</td>
+                <td style="padding: 0.75rem;">{{ pred.market }}</td>
+                <td style="padding: 0.75rem;">{{ "%.2f"|format(pred.predicted_price) }}</td>
+                <td style="padding: 0.75rem;">{{ "%.2f"|format(pred.min_price) }} - {{ "%.2f"|format(pred.max_price) }}</td>
+                <td style="padding: 0.75rem;">{{ pred.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div style="margin-top: 2rem; display: flex; justify-content: space-between;">
+        <div>
+            Page {{ predictions.page }} of {{ predictions.pages }}
+        </div>
+        <div>
+            {% if predictions.has_prev %}
+                <a href="{{ url_for('admin.admin_predictions', page=predictions.prev_num) }}" class="btn btn-sm btn-primary">Previous</a>
+            {% endif %}
+            {% if predictions.has_next %}
+                <a href="{{ url_for('admin.admin_predictions', page=predictions.next_num) }}" class="btn btn-sm btn-primary">Next</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

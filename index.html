@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Smart Market Price Prediction{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1 style="color: #2e7d32; margin-bottom: 2rem; text-align: center;">Smart Market Price Prediction</h1>
+    <p style="text-align: center; margin-bottom: 2rem;">Get AI-powered price forecasts for Kenyan agricultural markets</p>
+    
+    <form id="predictionForm">
+        <div class="grid-2">
+            <div class="form-group">
+                <label for="crop">Select Crop</label>
+                <select class="form-control" id="crop" required>
+                    <option value="">-- Choose crop --</option>
+                    <option value="Maize">Maize</option>
+                    <option value="Tomatoes">Tomatoes</option>
+                    <option value="Onions">Onions</option>
+                    <option value="Bananas">Bananas</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="market">Select Market</label>
+                <select class="form-control" id="market" required>
+                    <option value="">-- Choose market --</option>
+                    <option value="Nairobi">Nairobi</option>
+                    <option value="Kirinyaga">Kirinyaga</option>
+                    <option value="Uasin Gishu">Uasin Gishu</option>
+                    <option value="Kisumu">Kisumu</option>
+                    <option value="Mombasa">Mombasa</option>
+                    <option value="Nakuru">Nakuru</option>
+                    <option value="Kiambu">Kiambu</option>
+                    <option value="Meru">Meru</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="grid-2">
+            <div class="form-group">
+                <label for="days">Days Ahead</label>
+                <input type="number" class="form-control" id="days" min="1" max="30" value="7" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="month">Month (optional)</label>
+                <select class="form-control" id="month">
+                    <option value="">Current month</option>
+                    <option value="1">January</option>
+                    <option value="2">February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>
+            </div>
+        </div>
+        
+        <div style="margin: 20px 0;">
+            <a href="#" id="toggleAdvanced" style="color: #2e7d32; text-decoration: none;">
+                ▼ Advanced weather options
+            </a>
+        </div>
+        
+        <div id="advancedOptions" style="display: none;">
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="rainfall">Rainfall (mm)</label>
+                    <input type="number" class="form-control" id="rainfall" step="0.1" placeholder="Optional">
+                </div>
+                
+                <div class="form-group">
+                    <label for="temperature">Temperature (°C)</label>
+                    <input type="number" class="form-control" id="temperature" step="0.1" placeholder="Optional">
+                </div>
+            </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="width: 100%;" id="predictBtn">
+            Get Price Prediction
+            <span id="spinner" style="display: none; border: 2px solid white; border-top: 2px solid #2e7d32; border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; display: inline-block; margin-left: 10px;"></span>
+        </button>
+    </form>
+    
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+    
+    <div id="result" style="display: none; margin-top: 2rem; padding: 1.5rem; background: #f1f8e9; border-radius: 10px; border-left: 5px solid #2e7d32;">
+        <h3 style="color: #2e7d32; margin-bottom: 1rem;">Prediction Result</h3>
+        
+        <div style="background: white; padding: 1.5rem; border-radius: 10px; text-align: center; margin-bottom: 1rem;">
+            <div style="color: #666;">Predicted Price</div>
+            <div style="font-size: 3em; font-weight: bold; color: #2e7d32;" id="predictedPrice">KES 0</div>
+            <div>per kilogram</div>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; background: white; padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+            <div style="text-align: center;">
+                <div style="color: #666;">Minimum</div>
+                <div style="font-size: 1.3em; font-weight: bold; color: #2e7d32;" id="minPrice">KES 0</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="color: #666;">Maximum</div>
+                <div style="font-size: 1.3em; font-weight: bold; color: #2e7d32;" id="maxPrice">KES 0</div>
+            </div>
+        </div>
+        
+        <div style="margin: 1rem 0;">
+            <strong>Key Factors:</strong>
+            <div id="factors" style="margin-top: 0.5rem;"></div>
+        </div>
+        
+        <div style="background: #fff3e0; padding: 1rem; border-radius: 5px; font-style: italic;" id="explanation"></div>
+        
+        <p style="color: #666; margin-top: 1rem;" id="forecastDate"></p>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 2rem;">
+    <h3 style="color: #2e7d32; margin-bottom: 1rem;">Model Performance</h3>
+    <div class="grid-2">
+        <div style="background: #f5f5f5; padding: 1rem; border-radius: 5px; text-align: center;">
+            <div>Mean Absolute Error</div>
+            <div style="font-size: 1.5em; font-weight: bold; color: #2e7d32;" id="mae">-</div>
+        </div>
+        <div style="background: #f5f5f5; padding: 1rem; border-radius: 5px; text-align: center;">
+            <div>R² Score</div>
+            <div style="font-size: 1.5em; font-weight: bold; color: #2e7d32;" id="r2">-</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('toggleAdvanced').addEventListener('click', function(e) {
+        e.preventDefault();
+        const advanced = document.getElementById('advancedOptions');
+        if (advanced.style.display === 'none') {
+            advanced.style.display = 'block';
+            this.innerHTML = '▲ Hide advanced options';
+        } else {
+            advanced.style.display = 'none';
+            this.innerHTML = '▼ Advanced weather options';
+        }
+    });
+    
+    fetch('/metrics')
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('mae').textContent = data.MAE + ' KES' || '-';
+            document.getElementById('r2').textContent = data.R2 || '-';
+        })
+        .catch(error => {
+            console.log('Could not load metrics');
+        });
+    
+    document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const btn = document.getElementById('predictBtn');
+        const spinner = document.getElementById('spinner');
+        btn.disabled = true;
+        spinner.style.display = 'inline-block';
+        
+        const data = {
+            crop: document.getElementById('crop').value,
+            market: document.getElementById('market').value,
+            days: parseInt(document.getElementById('days').value),
+            month: document.getElementById('month').value || null,
+            rainfall: document.getElementById('rainfall').value || null,
+            temperature: document.getElementById('temperature').value || null
+        };
+        
+        if (!data.crop || !data.market) {
+            alert('Please select both crop and market');
+            btn.disabled = false;
+            spinner.style.display = 'none';
+            return;
+        }
+        
+        try {
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                displayResult(result.prediction);
+            } else {
+                alert('Error: ' + (result.error || 'Unknown error'));
+            }
+        } catch (error) {
+            alert('Failed to get prediction. Error: ' + error.message);
+        } finally {
+            btn.disabled = false;
+            spinner.style.display = 'none';
+        }
+    });
+    
+    function displayResult(pred) {
+        document.getElementById('result').style.display = 'block';
+        
+        document.getElementById('predictedPrice').textContent = 'KES ' + (pred.price || 0);
+        document.getElementById('minPrice').textContent = 'KES ' + (pred.min_price || 0);
+        document.getElementById('maxPrice').textContent = 'KES ' + (pred.max_price || 0);
+        
+        const factorsDiv = document.getElementById('factors');
+        factorsDiv.innerHTML = '';
+        
+        if (pred.top_factors && pred.top_factors.length > 0) {
+            pred.top_factors.forEach(factor => {
+                const span = document.createElement('span');
+                span.style.cssText = 'display: inline-block; background: #c8e6c9; color: #1b5e20; padding: 5px 15px; border-radius: 20px; margin: 5px;';
+                span.textContent = factor.replace(/_/g, ' ');
+                factorsDiv.appendChild(span);
+            });
+        }
+        
+        document.getElementById('explanation').textContent = pred.explanation || 'No explanation available';
+        
+        const date = new Date();
+        date.setDate(date.getDate() + (pred.days || 7));
+        document.getElementById('forecastDate').innerHTML = 'Forecast for: ' + date.toLocaleDateString();
+    }
+</script>
+{% endblock %}

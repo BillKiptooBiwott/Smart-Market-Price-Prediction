@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Statistics - Admin{% endblock %}
+
+{% block content %}
+<h1 style="color: #2e7d32; margin-bottom: 2rem;">System Statistics</h1>
+
+<div class="grid-2" style="margin-bottom: 2rem;">
+    <div class="card" style="text-align: center;">
+        <h3 style="color: #2e7d32;">Total Users</h3>
+        <p style="font-size: 2.5rem; font-weight: bold;">{{ total_users }}</p>
+    </div>
+    
+    <div class="card" style="text-align: center;">
+        <h3 style="color: #2e7d32;">Active Today</h3>
+        <p style="font-size: 2.5rem; font-weight: bold;">{{ active_today }}</p>
+    </div>
+</div>
+
+<div class="grid-2" style="margin-bottom: 2rem;">
+    <div class="card" style="text-align: center;">
+        <h3 style="color: #2e7d32;">Total Predictions</h3>
+        <p style="font-size: 2.5rem; font-weight: bold;">{{ total_preds }}</p>
+    </div>
+    
+    <div class="card" style="text-align: center;">
+        <h3 style="color: #2e7d32;">Avg per User</h3>
+        <p style="font-size: 2.5rem; font-weight: bold;">{{ avg_pred_per_user }}</p>
+    </div>
+</div>
+
+<div class="card">
+    <h3 style="color: #2e7d32; margin-bottom: 1rem;">Predictions by Crop</h3>
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="border-bottom: 2px solid #2e7d32;">
+                <th style="text-align: left; padding: 0.75rem;">Crop</th>
+                <th style="text-align: left; padding: 0.75rem;">Number of Predictions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for crop, count in crop_stats %}
+            <tr style="border-bottom: 1px solid #c8e6c9;">
+                <td style="padding: 0.75rem;">{{ crop }}</td>
+                <td style="padding: 0.75rem;">{{ count }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
